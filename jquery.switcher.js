@@ -158,15 +158,13 @@
 			},
 			update: function ( o, disableAnimation ) {
 				var animateObject = {};
-				console.log( isOn() );
 				if ( isOn() ) {
-					animateObject[ attrToUse ] = ( !isSwaped ) ? switcherDimension - handlerDimension + 'px' : '0px';
+					animateObject[ attrToUse ] = switcherDimension - handlerDimension + 'px';
 
 					// $( switchOnBackground ).show( options.useAnimation && !disableAnimation ? options.animationTime : 0 );
 					$( handler ).animate( animateObject, options.useAnimation && !disableAnimation ? options.animationTime : 0);
 				} else {
-					animateObject[ attrToUse ] = ( !isSwaped ) ? '0px' : switcherDimension - handlerDimension + 'px';
-
+					animateObject[ attrToUse ] = '0px';
 					// $( switchOnBackground ).hide( options.useAnimation && !disableAnimation ? options.animationTime : 0);
 					$( handler ).animate( animateObject, options.useAnimation && !disableAnimation ? options.animationTime : 0 );
 				}
@@ -240,7 +238,6 @@
 
 			// on dragging handler
 			var dragging = function ( event ) {
-				console.log('dragging');
 				var currentOffset = 0;
 
 				isDragging = true;
