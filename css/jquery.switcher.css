@@ -1,0 +1,43 @@
+.ui-switcher.netkata-switcher {
+	position: relative;
+	display: inline-block;
+	width: 55px;
+	height: 13px;
+	cursor: pointer;
+	background: url(../img/switch-container-horizontal.png) 0 0 no-repeat;
+	z-index: 10;
+}
+.ui-switcher.netkata-switcher .ui-switcher-background-on {
+	display: none;
+}
+.ui-switcher.netkata-switcher .ui-switcher-handler {
+	position: absolute;
+	left: 0;
+	width: 23px;
+	height: 12px;
+	margin: 0 1px;
+	background: url(../img/switch-handler-horizontal.png) 0 0 no-repeat;
+	z-index: 20;
+}
+
+
+.vertical .ui-switcher.netkata-switcher {
+	position: relative;
+	display: inline-block;
+	height: 55px;
+	width: 13px;
+	cursor: pointer;
+	background: url(../img/switch-container-vertical.png) 0 0 no-repeat;
+	z-index: 10;
+}
+
+.vertical .ui-switcher.netkata-switcher .ui-switcher-handler {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 23px;
+	width: 12px;
+	margin: 0 1px;
+	background: url(../img/switch-handler-vertical.png) 0 0 no-repeat;
+	z-index: 20;
+}

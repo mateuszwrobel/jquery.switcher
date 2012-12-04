@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Js2coffee: convert JavaScript code to CoffeeScript</title>
+		<meta charset='UTF-8' />
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script type="text/javascript" src="jquery.switcher.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				$('.horizontal input.switch').switcher({
+					customClass: 'netkata-switcher',
+					toggledOn: function() {
+
+						$(this).parent().parent().find('.toggleTarget').removeAttr('disabled');
+					},
+					toggledOff: function() {
+						console.log( $(this).parent() );
+						$(this).parent().parent().find('.toggleTarget').attr('disabled', 'disabled');
+					}
+				});
+
+				$('.vertical .switch').switcher({
+					customClass: 'netkata-switcher',
+					position: 'vertical',
+					toggledOn: function() {
+						$(this).parent().parent().find('.toggleTarget').removeAttr('disabled');
+					},
+					toggledOff: function() {
+						$(this).parent().parent().find('.toggleTarget').attr('disabled', 'disabled');
+					}
+				});
+
+				$('.toggle-switch').click( function ( event ) {
+					event.preventDefault();
+					$(this).parent().parent().find('input.switch').switcher('toggle');
+				} );
+
+				$('.toggle-on-switch').click( function ( event ) {
+					event.preventDefault();
+					$(this).parent().parent().find('input.switch').switcher('toggleOn');
+				} );
+
+				$('.toggle-off-switch').click( function ( event ) {
+					event.preventDefault();
+					$(this).parent().parent().find('input.switch').switcher('toggleOff');
+				} );
+			});
+		</script>
+		<link rel="stylesheet" href="css/jquery.switcher.css">
+	</head>
+	<body>
+		<div>
+			<h1>Switcher plugin demo</h1>
+		</div>
+		<div class="horizontal">
+			<h2>Horizontal switch</h2>
+			<form action="" method="post">
+				<p><input type="checkbox" class="switch" checked="checked" /></p>
+				<div><textarea class="toggleTarget">asfdsadfasdf</textarea></div>
+				<p><button class="toggle-switch">Toggle</button></p>
+				<p><button class="toggle-on-switch">Toggle On</button></p>
+				<p><button class="toggle-off-switch">Toggle Off</button></p>
+			</form>
+		</div>
+
+		<div class="vertical">
+			<h2>Vertical switch</h2>
+			<form action="" method="post">
+				<p><input type="checkbox" class="switch" checked="checked" /></p>
+				<div><textarea class="toggleTarget">asfdsadfasdf</textarea></div>
+				<p><button class="toggle-switch">Toggle</button></p>
+				<p><button class="toggle-on-switch">Toggle On</button></p>
+				<p><button class="toggle-off-switch">Toggle Off</button></p>
+			</form>
+		</div>
+	</body>
+</html>
