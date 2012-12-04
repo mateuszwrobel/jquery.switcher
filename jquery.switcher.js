@@ -12,8 +12,9 @@
 	 *	customClass (string) name for additional class for switcher
 	 *	cssPrefix (string) prefix for css classes for switcher
 	 *	dragable (boolean)
-	 *	position: (string) possible values: vertical, horizontal - for setting handler position
 	 *	onlyLeftClick: (boolean) allow drag/click only for left mouse button
+	 *	position: (string) possible values: vertical, horizontal - for setting handler position
+	 *	swapOnOff: (boolean)
 	 *	useAnimation: (boolean)
 	 *	toggled (function) callback function is called when toggle event is triggered
 	 *	toggledOn: (function) callback function is called when toggleOn event is triggered
@@ -27,8 +28,9 @@
 		customClass: '',
 		cssPrefix: "ui-",
 		dragable: true,
-		position: 'horizontal',
 		onlyLeftClick: true,
+		position: 'horizontal',
+		swapOnOff: false,
 		useAnimation: true,
 		toggled: function () { },
 		toggledOn: function () { },
@@ -58,6 +60,7 @@
 		// flags
 		var isHorizontal = ( options.position === 'horizontal' ) ? true : false;
 		var isVertical = ( options.position === 'vertical' ) ? true : false;
+		var isSwaped = ( options.swapOnOff === true ) ? true : false;
 
 		if ( !isHorizontal && !isVertical ) {
 			this.options.position = 'horizontal';
@@ -65,9 +68,6 @@
 		}
 
 		// function vars
-		var setClassForElement = function ( element, className ) {
-			element.className = options.cssPrefix + className ;
-		};
 
 		var allowOnlyLeftClick = function ( event ) {
 			if ( options.onlyLeftClick ) {
@@ -77,6 +77,33 @@
 			}
 			return false;
 		};
+
+		var isOn = function () {
+			if ( !isSwaped )
+				return $( checkbox ).is( ':checked' );
+			else
+				return !$( checkbox ).is( ':checked' );
+		};
+
+		var setToOn = function () {
+			if ( !isSwaped )
+				$( checkbox ).attr( 'checked', 'checked' );
+			else
+				$( checkbox ).removeAttr( 'checked' );
+		};
+
+		var setToOff = function () {
+			if ( !isSwaped )
+				$( checkbox ).removeAttr( 'checked' );
+			else
+				$( checkbox ).attr( 'checked', 'checked' );
+		};
+
+		var setClassForElement = function ( element, className ) {
+			element.className = options.cssPrefix + className ;
+		};
+
+
 
 		// set classes for new elements
 		setClassForElement( switcher, 'switcher' );
@@ -92,8 +119,8 @@
 			.after( $( switcher )
 				.append( switchOnBackground )
 				.append( handler )
+				.attr( 'tabindex', 1 )
 			)
-			.trigger( 'update', true )
 			.hide();
 
 		var switcherDimension = ( isHorizontal ) ? parseInt( $( switcher ).width(), 10 ) : parseInt( $( switcher ).height(), 10 );
@@ -103,27 +130,27 @@
 		// declare events for checkbox
 		checkbox.events = {
 			toggle: function () {
-				if ( $( checkbox ).is( ':checked' ) ) {
-					$( checkbox ).removeAttr( 'checked' );
+				if ( isOn() ) {
+					setToOff();
 					options.toggledOff.call( checkbox );
 				} else {
-					$( checkbox ).attr( 'checked', 'checked' );
+					setToOn();
 					options.toggledOn.call( checkbox );
 				}
 				$( checkbox ).trigger( 'update' );
 				options.toggled.call( checkbox );
 			},
 			toggleOn: function () {
-				if ( !$( checkbox ).is(':checked') ) {
-					$( checkbox ).attr( 'checked', 'checked' );
+				if ( !isOn() ) {
+					setToOn();
 					options.toggledOn.call( checkbox );
 					options.toggled.call( checkbox );
 				}
 				$( checkbox ).trigger( 'update' );
 			},
 			toggleOff: function () {
-				if ( $( checkbox ).is(':checked') ) {
-					$( checkbox ).removeAttr( 'checked' );
+				if ( isOn() ) {
+					setToOff();
 					options.toggledOff.call( checkbox );
 					options.toggled.call( checkbox );
 				}
@@ -131,14 +158,14 @@
 			},
 			update: function ( o, disableAnimation ) {
 				var animateObject = {};
-
-				if ( $( checkbox ).is( ':checked' ) ) {
-					animateObject[ attrToUse ] = switcherDimension - handlerDimension + 'px';
+				console.log( isOn() );
+				if ( isOn() ) {
+					animateObject[ attrToUse ] = ( !isSwaped ) ? switcherDimension - handlerDimension + 'px' : '0px';
 
 					// $( switchOnBackground ).show( options.useAnimation && !disableAnimation ? options.animationTime : 0 );
 					$( handler ).animate( animateObject, options.useAnimation && !disableAnimation ? options.animationTime : 0);
 				} else {
-					animateObject[ attrToUse ] = '0px';
+					animateObject[ attrToUse ] = ( !isSwaped ) ? '0px' : switcherDimension - handlerDimension + 'px';
 
 					// $( switchOnBackground ).hide( options.useAnimation && !disableAnimation ? options.animationTime : 0);
 					$( handler ).animate( animateObject, options.useAnimation && !disableAnimation ? options.animationTime : 0 );
@@ -146,7 +173,14 @@
 			}
 		};
 
-		$( checkbox ).on( checkbox.events );
+		$( checkbox ).on( checkbox.events ).trigger( 'update', true );
+
+		// when switcher is selected hit space to change state
+		$( switcher ).on( 'keypress', function ( event ) {
+			if ( event.which === 32 ) {
+				$( checkbox ).trigger( 'toggle' );
+			}
+		} );
 
 		// declare events for switcher
 		if ( !options.dragable ) {
@@ -227,13 +261,16 @@
 
 			// on end of dragging
 			var endDrag = function ( event ) {
-				console.log('endDrag');
+				var eventToTrigger = '';
+
 				$( document ).off( 'mouseup mousemove touchmove touchend' );
 				if ( isDragging ) {
 					if ( newPosition <= centerOffset ) {
-						$( checkbox ).trigger ( 'toggleOff' );
+						eventToTrigger = ( !isSwaped ) ? 'toggleOff' : 'toggleOn';
+						$( checkbox ).trigger ( eventToTrigger );
 					} else {
-						$( checkbox ).trigger ( 'toggleOn' );
+						eventToTrigger = ( !isSwaped ) ? 'toggleOn' : 'toggleOff';
+						$( checkbox ).trigger ( eventToTrigger );
 					}
 				} else {
 					$( checkbox ).trigger ( 'toggle' );
