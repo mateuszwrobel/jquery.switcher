@@ -1,6 +1,6 @@
 /*!
  * jQuery switcher plugin
- * Original author: @okotetto (Mateusz Wróbel - wrobel.mateusz@gmail.com)
+ * Original author: @Okotetto (Mateusz Wróbel - wrobel.mateusz@gmail.com)
  * Licensed under the MIT license
  */
 
@@ -27,11 +27,14 @@
 		animationTime: 100,
 		customClass: '',
 		cssPrefix: "ui-",
+		displayHandler: true,
+		displayOnAndOff: false,
 		dragable: true,
 		onlyLeftClick: true,
 		position: 'horizontal',
 		swapOnOff: false,
 		useAnimation: true,
+
 		toggled: function () { },
 		toggledOn: function () { },
 		toggledOff: function () { }
@@ -46,6 +49,7 @@
 		this.init();
 	}
 
+	// create whole switcher instance
 	Switcher.prototype.init = function () {
 		if ( this.element.type !== 'checkbox'  ) {
 			throw( 'Chosen element is not checkbox. This plugin can be assign only to checkboxes' );
@@ -56,6 +60,7 @@
 		var options = this.options;
 		var switcher = document.createElement( 'a' );
 		var switchOnBackground = document.createElement( 'span' );
+		var switchOffBackground = document.createElement( 'span' );
 
 		// flags
 		var isHorizontal = ( options.position === 'horizontal' ) ? true : false;
@@ -68,7 +73,6 @@
 		}
 
 		// function vars
-
 		var allowOnlyLeftClick = function ( event ) {
 			if ( options.onlyLeftClick ) {
 				if ( event.button !== 0  && !( $.browser.msie && event.button === 1 ) ) {
@@ -78,27 +82,32 @@
 			return false;
 		};
 
+		// check checkbox state
+		// if swapOnOff option is false it return true for checked
+		// if swapOnOff option is true it return false for checked
+		//
+		// if true switcher state is set to on
+		// else state is set to off
 		var isOn = function () {
-			if ( !isSwaped )
-				return $( checkbox ).is( ':checked' );
-			else
-				return !$( checkbox ).is( ':checked' );
+			return $( checkbox ).is( ':checked' );
 		};
 
+		// set checkbox state to on
+		// if swapOnOff is true it unset checked attribute
+		// else it set cheched attribute to true
 		var setToOn = function () {
-			if ( !isSwaped )
-				$( checkbox ).attr( 'checked', 'checked' );
-			else
-				$( checkbox ).removeAttr( 'checked' );
+			$( checkbox ).attr( 'checked', 'checked' );
 		};
 
+		// set checkbox state to off
+		// if swapOnOff is true it set checked attribute to true
+		// else it unset cheched attribute
 		var setToOff = function () {
-			if ( !isSwaped )
-				$( checkbox ).removeAttr( 'checked' );
-			else
-				$( checkbox ).attr( 'checked', 'checked' );
+			$( checkbox ).removeAttr( 'checked' );
 		};
 
+		// set class to plugin elements
+		// it add prefix to each class name
 		var setClassForElement = function ( element, className ) {
 			element.className = options.cssPrefix + className ;
 		};
@@ -111,6 +120,7 @@
 			$( switcher ).addClass( options.customClass );
 		}
 		setClassForElement( switchOnBackground, 'switcher-background-on' );
+		setClassForElement( switchOffBackground, 'switcher-background-off' );
 		setClassForElement( handler, 'switcher-handler' );
 
 		// append to DOM new switcher
@@ -119,6 +129,7 @@
 			.after( $( switcher )
 				.append( switchOnBackground )
 				.append( handler )
+				.append( switchOffBackground )
 				.attr( 'tabindex', 1 )
 			)
 			.hide();
@@ -159,23 +170,28 @@
 			update: function ( o, disableAnimation ) {
 				var animateObject = {};
 				if ( isOn() ) {
-					animateObject[ attrToUse ] = switcherDimension - handlerDimension + 'px';
+					animateObject[ attrToUse ] = ( !isSwaped ) ? switcherDimension - handlerDimension + 'px' : '0px';
 
 					// $( switchOnBackground ).show( options.useAnimation && !disableAnimation ? options.animationTime : 0 );
 					$( handler ).animate( animateObject, options.useAnimation && !disableAnimation ? options.animationTime : 0);
 				} else {
-					animateObject[ attrToUse ] = '0px';
+					animateObject[ attrToUse ] = ( !isSwaped ) ? '0px' : switcherDimension - handlerDimension + 'px';
+
 					// $( switchOnBackground ).hide( options.useAnimation && !disableAnimation ? options.animationTime : 0);
 					$( handler ).animate( animateObject, options.useAnimation && !disableAnimation ? options.animationTime : 0 );
 				}
 			}
 		};
 
-		$( checkbox ).on( checkbox.events ).trigger( 'update', true );
+		$( checkbox )
+			// bind events to checkbox
+			.on( checkbox.events )
+			.trigger( 'update', true );
 
 		// when switcher is selected hit space to change state
 		$( switcher ).on( 'keypress', function ( event ) {
 			if ( event.which === 32 ) {
+				event.preventDefault();
 				$( checkbox ).trigger( 'toggle' );
 			}
 		} );
@@ -196,6 +212,7 @@
 				}
 			};
 
+			// bind events to switcher
 			$( switcher ).on( switcher.events );
 		} else {
 			// helper var for dragging
@@ -262,15 +279,16 @@
 
 				$( document ).off( 'mouseup mousemove touchmove touchend' );
 				if ( isDragging ) {
-					if ( newPosition <= centerOffset ) {
-						eventToTrigger = ( !isSwaped ) ? 'toggleOff' : 'toggleOn';
-						$( checkbox ).trigger ( eventToTrigger );
+					if (
+						( newPosition <= centerOffset && !isSwaped ) ||
+						( newPosition > centerOffset && isSwaped )
+						) {
+						$( checkbox ).trigger ( 'toggleOff' );
 					} else {
-						eventToTrigger = ( !isSwaped ) ? 'toggleOn' : 'toggleOff';
-						$( checkbox ).trigger ( eventToTrigger );
+						$( checkbox ).trigger ( 'toggleOn' );
 					}
 				} else {
-					$( checkbox ).trigger ( 'toggle' );
+					$( checkbox ).trigger( 'toggle' );
 				}
 
 				isDragging = false;
@@ -302,7 +320,7 @@
 				}
 			};
 
-			// bind events for switcher
+			// bind events to switcher
 			$( switcher ).on( {
 				mousedown: switcher.events.mousedown,
 				touchstart: switcher.events.touchstart
@@ -337,12 +355,10 @@
 						return new Switcher( element, options );
 					})( this )
 				);
-			} else {
-				if ( switcherInstantion[ method ] ) {
+			} else if ( switcherInstantion[ method ] ) {
 					switcherInstantion[ method ].call( this );
-				} else {
-					throw( 'Method ' + method + ' does not exist' );
-				}
+			} else {
+				throw( 'Method ' + method + ' does not exist' );
 			}
 		} );
 	};
