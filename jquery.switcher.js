@@ -20,7 +20,7 @@
 	 *	toggledOn: (function) callback function is called when toggleOn event is triggered
 	 *	toggledOff: (function) callback function is called when toggleOff event is triggered
 	 */
-	
+
 	// Create the defaults once
 	var pluginName = "switcher";
 	var defaults = {
@@ -45,13 +45,13 @@
 		this.element = element;
 
 		this.options = $.extend( {}, defaults, options );
-	
+
 		this.init();
 	}
 
 	// create whole switcher instance
 	Switcher.prototype.init = function () {
-		if ( this.element.type !== 'checkbox'  ) {
+		if ( this.element.type !== 'checkbox' ) {
 			throw( 'Chosen element is not checkbox. This plugin can be assign only to checkboxes' );
 		}
 
@@ -245,10 +245,11 @@
 					touchend: switcher.events.touchend
 				} );
 
-				if ( isHorizontal )
+				if ( isHorizontal ) {
 					startOffset = event.pageX;
-				else
+				} else {
 					startOffset = event.pageY;
+				}
 
 				handlerPosition = parseInt( $( handler ).css( attrToUse ), 10 );
 			};
@@ -259,10 +260,11 @@
 
 				isDragging = true;
 
-				if ( isHorizontal )
+				if ( isHorizontal ) {
 					currentOffset = event.pageX;
-				else
+				} else {
 					currentOffset = event.pageY;
+				}
 
 				newPosition = handlerPosition + currentOffset - startOffset;
 
@@ -274,10 +276,9 @@
 			};
 
 			// on end of dragging
-			var endDrag = function ( event ) {
-				var eventToTrigger = '';
-
+			var endDrag = function () {
 				$( document ).off( 'mouseup mousemove touchmove touchend' );
+
 				if ( isDragging ) {
 					if (
 						( newPosition <= centerOffset && !isSwaped ) ||
@@ -306,13 +307,13 @@
 					$( document ).off( 'mousedown' );
 					startDrag( event.touches[ 0 ] );
 				},
-				touchmove: function () {
+				touchmove: function ( event ) {
 					event.preventDefault();
 
 					$( document ).off( 'mousemove' );
 					dragging( event.touches[ 0 ] );
 				},
-				touchend: function () {
+				touchend: function ( event ) {
 					event.preventDefault();
 
 					$( document ).off( 'mouseup' );
@@ -325,7 +326,7 @@
 				mousedown: switcher.events.mousedown,
 				touchstart: switcher.events.touchstart
 			} );
-		}
+		} // end of dragable
 	};
 
 	Switcher.prototype.toggle = function () {
@@ -349,12 +350,11 @@
 
 		return this.each( function () {
 			var switcherInstantion = $.data( this, nameForData );
-
+			var createSwitcher = function ( element ) {
+				return new Switcher( element, options );
+			};
 			if ( !switcherInstantion ) {
-				$.data( this, nameForData, (function ( element ) {
-						return new Switcher( element, options );
-					})( this )
-				);
+				$.data( this, nameForData, createSwitcher( this ) );
 			} else if ( switcherInstantion[ method ] ) {
 					switcherInstantion[ method ].call( this );
 			} else {
