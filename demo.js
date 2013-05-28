@@ -28,6 +28,9 @@ $(function () {
 
 	$('.toggle-on-switch').click( function ( event ) {
 		event.preventDefault();
+		Switcher.prototype.toggleOn = function() {
+			console.log( 'toggledon' );
+		};
 		$(this).parent().parent().find('input.switch').switcher('toggleOn');
 	} );
 

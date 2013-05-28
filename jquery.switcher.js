@@ -56,11 +56,14 @@
 		}
 
 		var checkbox = this.element;
-		var handler = document.createElement( 'span' );
 		var options = this.options;
+
+		// create switcher elements
 		var switcher = document.createElement( 'a' );
-		var switchOnBackground = document.createElement( 'span' );
-		var switchOffBackground = document.createElement( 'span' );
+
+		var handler = ( options.displayHandler === true ) ? document.createElement( 'span' ) : null;
+		var switchOnBackground = ( options.displayOnAndOff === true ) ? document.createElement( 'span' ) : null;
+		var switchOffBackground = ( options.displayOnAndOff === true ) ? document.createElement( 'span' ) : null;
 
 		// flags
 		var isHorizontal = ( options.position === 'horizontal' ) ? true : false;
@@ -343,7 +346,7 @@
 
 	// A really lightweight plugin wrapper around the constructor,
 	// preventing against multiple instantiations
-	$.fn[pluginName] = function ( options ) {
+	$.fn[ pluginName ] = function ( options ) {
 		var nameForData = "plugin_" + pluginName;
 
 		var method = ( typeof options === 'string' ) ? options : '';
