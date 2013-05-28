@@ -112,7 +112,7 @@
 		// set class to plugin elements
 		// it add prefix to each class name
 		var setClassForElement = function ( element, className ) {
-			element.className = options.cssPrefix + className ;
+			$( element ).addClass( options.cssPrefix + className );
 		};
 
 
