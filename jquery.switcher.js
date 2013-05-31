@@ -122,6 +122,7 @@
 		if ( options.customClass.length > 0 ) {
 			$( switcher ).addClass( options.customClass );
 		}
+		
 		setClassForElement( switchOnBackground, 'switcher-background-on' );
 		setClassForElement( switchOffBackground, 'switcher-background-off' );
 		setClassForElement( handler, 'switcher-handler' );
